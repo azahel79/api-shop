@@ -1,5 +1,4 @@
-const { threadId } = require("worker_threads");
-const coneccionDB = require("../db/coneccionDB");
+
 
 class App{
     constructor(){
@@ -7,6 +6,7 @@ class App{
           this.app = this.express();
           this.cors = require("cors");
           this.dotenv = require("dotenv").config();
+          this.mongoose = require("mongoose");
     }
 
     controllers(){
@@ -17,9 +17,13 @@ class App{
         this.app.use(this.express.urlencoded({extended: false}));
         this.app.use(this.cors());
     }
-    conectarDB(){
-      coneccionDB.authenticate();
-      console.log("conectada la base de datos MYSQL");
+      conectarDB(){
+        this.mongoose.connect(process.env.MONGODB_CNN).then(res=>{
+         console.log("se conecto ala base de datos MONGODB");
+        }).catch(error=>{
+            console.log(error);
+            throw new Error("no se conecto ala base de datos de MONGODB");
+        })
     }
     servidores(){
          this.app.use("/",require("../router/routeUser"));
