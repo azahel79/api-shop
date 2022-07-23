@@ -27,6 +27,7 @@ class App{
     }
     servidores(){
          this.app.use("/",require("../router/routeUser"));
+         this.app.use("/",require("../router/routerShop"));
     }
 
     listen(){
