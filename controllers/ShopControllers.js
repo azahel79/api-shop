@@ -133,9 +133,9 @@ exports.buyProduct = async(req = request,res = response)=>{
 // ELIMINAR COMPRA
 
 exports.deleteBuy = async(req = request,res = response)=>{
-    try {
-       
-        
+   
+     // VERIFICAR SI ES UN ID DE MONGODBs
+   try {
        if(req.params.userId.length  < 24){
           return res.status(400).json({msg: "no es un id de mongoDB"});
        } 
@@ -152,27 +152,20 @@ exports.deleteBuy = async(req = request,res = response)=>{
        }
 
        //VERIFICAR SI LA COMPRA SI EXISTE
-      //  console.log(req.query);
+      
        const purchaseExisting = await modeloBuy.findById(req.query.purchaseId);
 
        if(!purchaseExisting){
            return  res.status(400).json({msg: "esta compra no existe"})
        }
        
-      //   console.log(userExisting);
+   
 
         ///VERIFICAR SI ESTA COMPRA CORRESPONDE AL USUARIO
         const purchaseUser =  await modeloBuy.find({usuarioId: userExisting._id});
-
-      //   console.log(purchaseUser);      
-
-      //   console.log(req.query.purchaseId);
-
-     
-      
+  
        const purchaseUserExisting = purchaseUser.filter(purchase=> purchase._id.toString() === req.query.purchaseId);
-
-      //  console.log(purchaseUserExisting.length);
+   
        if(purchaseUserExisting.length ===  0){
            return res.status(400).json({msg: "esta compra no existe en este usuario"})
        }
@@ -189,4 +182,109 @@ exports.deleteBuy = async(req = request,res = response)=>{
        console.log(error);
        return res.status(500).json({msg: "hubo un error"});
     }
+}
+
+
+// CONTROLLER PARA COMPRA UN PRODUCTO MAS POR EL CONTROL DE AUMENTO
+exports.addBuyController = async(req = request,res = response)=>{
+    try {
+      if(req.params.userId.length  < 24){
+         return res.status(400).json({msg: "no es un id de mongoDB"});
+      } 
+    
+     // VERIFICAR SI EXISTE EL ID DEL USUARIO
+      const userExisting = await modeloUser.findById(req.params.userId);
+      if(!userExisting){
+         return  res.status(400).json({msg: "no existe este usuario"});
+        }
+       
+      ///VERIFICAR SI EL ID DEL USUARIO CORRESPONDE CON EL USUARIO LOGEADO
+      if(req.user !== req.params.userId){
+          return res.status(400).json({msg: "no hay permiso"})
+      }
+
+       //VERIFICAR SI LA COMPRA SI EXISTE
+      
+       const purchaseExisting = await modeloBuy.findById(req.query.purchaseId);
+
+       if(!purchaseExisting){
+           return  res.status(400).json({msg: "esta compra no existe"})
+       }
+       
+   
+
+        ///VERIFICAR SI ESTA COMPRA CORRESPONDE AL USUARIO
+        const purchaseUser =  await modeloBuy.find({usuarioId: userExisting._id});
+  
+       const purchaseUserExisting = purchaseUser.filter(purchase=> purchase._id.toString() === req.query.purchaseId);
+   
+       if(purchaseUserExisting.length ===  0){
+           return res.status(400).json({msg: "esta compra no existe en este usuario"})
+       }
+        
+       
+      purchaseUserExisting[0].cantidad = purchaseUserExisting[0].cantidad + 1;
+
+      await purchaseUserExisting[0].save();
+       
+      res.json({msg: "se edito la compra",buy: purchaseUserExisting[0]})
+
+    } catch (error) {
+       return res.status(500).json({msg: "hubo un error"});
+    }
+}
+
+
+// CONTROLLER PARA ELIMINAR UNA COMPRA POR EL CONTROL DE RESTAR COMPRA
+
+exports.deleteBuyController = async(req = request,res = response)=>{
+   try {
+      if(req.params.userId.length  < 24){
+         return res.status(400).json({msg: "no es un id de mongoDB"});
+      } 
+    
+     // VERIFICAR SI EXISTE EL ID DEL USUARIO
+      const userExisting = await modeloUser.findById(req.params.userId);
+      if(!userExisting){
+         return  res.status(400).json({msg: "no existe este usuario"});
+        }
+       
+      ///VERIFICAR SI EL ID DEL USUARIO CORRESPONDE CON EL USUARIO LOGEADO
+      if(req.user !== req.params.userId){
+          return res.status(400).json({msg: "no hay permiso"})
+      }
+
+       //VERIFICAR SI LA COMPRA SI EXISTE
+      
+       const purchaseExisting = await modeloBuy.findById(req.query.purchaseId);
+
+       if(!purchaseExisting){
+           return  res.status(400).json({msg: "esta compra no existe"})
+       }
+       
+        ///VERIFICAR SI ESTA COMPRA CORRESPONDE AL USUARIO
+        const purchaseUser =  await modeloBuy.find({usuarioId: userExisting._id});
+  
+       const purchaseUserExisting = purchaseUser.filter(purchase=> purchase._id.toString() === req.query.purchaseId);
+   
+       if(purchaseUserExisting.length ===  0){
+           return res.status(400).json({msg: "esta compra no existe en este usuario"})
+       }
+
+
+
+         purchaseUserExisting[0].cantidad = purchaseUserExisting[0].cantidad - 1;
+         
+         await purchaseUserExisting[0].save();
+        if(purchaseUserExisting[0].cantidad < 1){
+         await modeloBuy.findByIdAndDelete(req.query.purchaseId);
+         
+            return res.json({msg: "se elimino la compra por completo"});
+        }
+      
+        res.json({msg: "se elimino una compra",buy: purchaseUserExisting[0]});
+      
+   } catch (error) {
+      return res.status(500).json({msg: "hubo un error"});
+   }
 }

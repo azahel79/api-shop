@@ -20,7 +20,6 @@ router.post("/register",[
 
 // INICIAR SESION
 router.post("/login",[
-    check("nombre","nombre min: 4 caracteres").isLength({min: 4}),
     check("email","escribe un email valido").isEmail(),
     check("password","contraseña min: 6 caracteres").isLength({min: 6}),
     globalValidations
