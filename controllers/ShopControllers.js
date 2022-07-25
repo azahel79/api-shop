@@ -80,8 +80,8 @@ exports.buyProduct = async(req = request,res = response)=>{
 
           //VERIFICAR SI EXISTE LA COMPRA
           
-            const buyUser = await  modeloBuy.find({usuarioId: req.params.userId});
-           const buyExisiting =  buyUser.filter(buy=> buy.nombre === req.body.nombre);
+            const purchaseUser = await  modeloBuy.find({usuarioId: req.params.userId});
+           const buyExisiting =  purchaseUser.filter(buy=> buy.nombre === req.body.nombre);
             
             
          if(buyExisiting.length > 0){
@@ -270,9 +270,6 @@ exports.deleteBuyController = async(req = request,res = response)=>{
        if(purchaseUserExisting.length ===  0){
            return res.status(400).json({msg: "esta compra no existe en este usuario"})
        }
-
-
-
          purchaseUserExisting[0].cantidad = purchaseUserExisting[0].cantidad - 1;
          
          await purchaseUserExisting[0].save();
