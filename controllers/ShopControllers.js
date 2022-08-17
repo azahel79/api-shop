@@ -13,7 +13,7 @@ exports.listProducts = async(req = request,res = response)=>{
      if(!req.query.hasOwnProperty("genre")){
         products = await modeloProductos.find();
         return res.json({products});
-     }
+     }  
   
       products = await modeloProductos.find({genero: req.query.genre});
 
@@ -93,7 +93,7 @@ exports.buyProduct = async(req = request,res = response)=>{
                     // VERIFICAR SI EXISTE LA COMPRA POR GENERO Y LA TALLA
                   if(sizeExisting.length > 0){
                     sizeExisting[0].cantidad = sizeExisting[0].cantidad + 1;
-                  //   console.log("talla encontrada",sizeExisting[0]); 
+                
                     await sizeExisting[0].save();   
                     return res.json({msg: "nueva compra mismo genero y misma talla",buy: sizeExisting[0]});              
                   }else{
